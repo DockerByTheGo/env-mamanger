@@ -1,70 +1,29 @@
-import type { ZodType, infer as zInfer } from "zod/v3";
+import type { ZodType } from "zod/v3";
 import { z } from "zod/v3";
 import { EnvManager } from "./EnvManager";
 import type { ZodString } from "zod/v3";
+import type { EnvConfig } from "./Env";
 
 
 
-export interface EnvConfig<
-TSchema extends ZodType,
-TOptional extends boolean = false,
-DTInfered extends zInfer <TSchema> = zInfer<TSchema>
-> {
-  name: string;
-  strategy: (name: string) => TOptional extends true 
-  ? Optionable<DTInfered> 
-  : DTInfered
-  schema?: TSchema;
-  defaultValue?: DTInfered;
-  isOptional?: TOptional;
-}
-
-interface EnvEntry<T> {
-  config: EnvConfig<T, any>;
-}
-
-type Optionable<T, TOptional extends boolean = false> = TOptional extends true ? T | undefined : T;
+export type Optionable<T, TOptional extends boolean = false> = TOptional extends true ? T | undefined : T;
 
 export type EnvConfigDefault = EnvConfig<ZodString, false>;
 
 export type EnvSchema = Record<string, EnvConfigDefault>
 
-/**
- * EnvManagerBuilder - A builder for creating type-safe environment configurations
- * 
- * @example
- * ```typescript
- * import { EnvManagerBuilder } from './EnvManagerBuilder';
- * import { z } from 'zod/v3';
- * 
- * const env = new EnvManagerBuilder()
- *   .fromProcess({ 
- *     name: "PORT", 
- *     defaultValue: "3000" 
- *   })
- *   .fromProcess({ 
- *     name: "NODE_ENV", 
- *     schema: z.enum(["development", "production"]), 
- *     isOptional: true 
- *   })
- *   .add({
- *     name: "API_KEY",
- *     strategy: (name) => getSecretFromVault(name),
- *   })
- *   .build();
- * 
- * // Type-safe access with IntelliSense
- * console.log(env.PORT);        // string
- * console.log(env.NODE_ENV);    // "development" | "production" | undefined
- * console.log(env.API_KEY);     // string
- * ```
- */
 export class EnvManagerBuilder<TEnv extends EnvSchema > {
-  private envEntries: EnvEntry<any>[] = [];
 
+  public readonly envEntries: TEnv = {}
   /**
    * Prebuilt strategy for getting environment variables from process.env
    */
+
+
+  //  we make the  constructor private since it breaks the intellisense because we cant manually type the return type of the constructor  
+  private constructor(){ 
+
+  }
 
   static empty() {
     return new EnvManagerBuilder<{}>()
@@ -89,17 +48,15 @@ export class EnvManagerBuilder<TEnv extends EnvSchema > {
    */
   add<
     TName extends string,
-    T,
+    TSchema extends ZodType,
     TOptional extends boolean = false,
-    TConfig extends EnvConfig<T, TOptional> = EnvConfig<T, TOptional>
+    TConfig extends EnvConfig<TSchema, TOptional> = EnvConfig<TSchema, TOptional>
   >(
     config: TConfig
   ): EnvManagerBuilder<TEnv & Record<TName, TConfig>> {
-    this.envEntries.push({ 
-      config: {
+    this.envEntries[config.name] = ({ 
         ...config,
         schema: config.schema ?? z.string() as any,
-      }
     });
     return this as any;
   }
@@ -117,7 +74,7 @@ export class EnvManagerBuilder<TEnv extends EnvSchema > {
    */
   fromProcess<
     TName extends string,
-    TSchema extends ZodType = ZodType<string>,
+    TSchema extends ZodType,
     TOptional extends boolean = false,
     TConfig extends EnvConfig<TSchema, TOptional> = EnvConfig<TSchema, TOptional>
   >(
@@ -137,29 +94,10 @@ export class EnvManagerBuilder<TEnv extends EnvSchema > {
    * @throws {ZodError} If validation fails for any environment variable
    */
   raw(): TEnv {
-    const env: Record<string, any> = {};
-
-    for (const { config } of this.envEntries) {
-      const rawValue = config.strategy(config.name);
-      
-      if (rawValue === undefined) {
-        if (config.defaultValue !== undefined) {
-          env[config.name] = config.defaultValue;
-        } else if (config.isOptional) {
-          env[config.name] = undefined;
-        } else {
-          throw new Error(`Environment variable "${config.name}" is required but not found`);
-        }
-      } else {
-        const parsed = config.schema!.parse(rawValue);
-        env[config.name] = parsed;
-      }
-    }
-
-    return env as TEnv;
+    return this.envEntries 
   }
   
   buildManager(): EnvManager<TEnv> {
-    return 
+    return EnvManager.new(this.envEntries as TEnv);
   }
 }
