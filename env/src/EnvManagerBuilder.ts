@@ -1,7 +1,7 @@
-import type { ZodString, ZodType } from "zod/v3";
+import type { ZodString, ZodType } from "zod";
 import type { EnvConfig } from "./Env";
 import process from "node:process";
-import { z } from "zod/v3";
+import z from "zod";
 import { EnvManager } from "./EnvManager";
 
 export type Optionable<T, TOptional extends boolean = false> = TOptional extends true ? T | undefined : T;

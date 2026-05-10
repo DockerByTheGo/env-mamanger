@@ -4,11 +4,8 @@
   "private": true,
   "module": "index.ts",
   "scripts": {
-    "lint": "bunx eslint src/Env.ts src/EnvManager.ts src/EnvManagerBuilder.ts tests/*.ts vitest.config.ts",
-    "build": "bunx tsc -p tsconfig.json --noEmit",
+    "lint": "bun --bun eslint .",
     "test": "bun --bun vitest run",
-    "test:watch": "bun --bun vitest",
-    "test:ci": "bun --bun vitest run",
     "coverage": "bun --bun vitest run --coverage"
   },
   "peerDependencies": {

@@ -1,6 +1,6 @@
-export type EnvManagerOptionsShape = {
+export interface EnvManagerOptionsShape {
   resolveAllAtStartup: boolean;
-};
+}
 
 export class EnvManagerOptions<T extends EnvManagerOptionsShape> {
   constructor(

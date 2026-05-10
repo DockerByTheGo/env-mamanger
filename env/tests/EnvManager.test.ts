@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { z } from "zod/v3";
+import z from "zod";
 import { EnvManager } from "../src/EnvManager";
 import { EnvManagerBuilder } from "../src/EnvManagerBuilder";
 

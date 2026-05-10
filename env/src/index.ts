@@ -17,18 +17,18 @@ console.log(env.NODE_ENV); // ✅ "development"
 const builder = new EnvManagerBuilder();
 
 const customEnv = builder
-  .fromProcess({ 
-    name: "PORT", 
-    defaultValue: "3000" 
+  .fromProcess({
+    name: "PORT",
+    defaultValue: "3000",
   })
-  .fromProcess({ 
-    name: "NODE_ENV", 
-    schema: z.enum(["development", "production"]), 
-    isOptional: true 
+  .fromProcess({
+    name: "NODE_ENV",
+    schema: z.enum(["development", "production"]),
+    isOptional: true,
   })
   .add({
     name: "CUSTOM_VAR",
-    strategy: (name) => "custom-value",
+    strategy: name => "custom-value",
   })
   .raw();
 

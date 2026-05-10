@@ -1,10 +1,11 @@
-import type { TypeOf as zInfer, ZodType } from "zod/v3";
+import type { ZodType } from "zod";
+import type z from "zod";
 import type { Optionable } from "./EnvManagerBuilder";
 
 export interface EnvConfig<
   TSchema extends ZodType,
   TOptional extends boolean = false,
-  DTInfered extends zInfer<TSchema> = zInfer<TSchema>,
+  DTInfered extends z.infer<TSchema> = z.infer<TSchema>,
 > {
   name: string;
   strategy: (name: string) => TOptional extends true ? Optionable<DTInfered> : DTInfered;
