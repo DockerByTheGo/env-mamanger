@@ -1,8 +1,12 @@
-import { describe, it, expectTypeOf } from "vitest";
+import { beforeEach, describe, expectTypeOf, it } from "vitest";
 import { z } from "zod/v3";
 import { EnvManagerBuilder } from "../src/EnvManagerBuilder";
 
 describe("EnvManagerBuilder - Type Tests", () => {
+  beforeEach(() => {
+    delete process.env.NODE_ENV;
+  });
+
   describe("raw() return types", () => {
     it("should infer string type by default", () => {
       const env = EnvManagerBuilder.empty()
@@ -100,7 +104,7 @@ describe("EnvManagerBuilder - Type Tests", () => {
       const env = EnvManagerBuilder.empty()
         .fromProcess({
           name: "ALLOWED_HOSTS",
-          schema: z.string().transform((str) => str.split(",")),
+          schema: z.string().transform(str => str.split(",")),
           defaultValue: "localhost",
         })
         .raw();
@@ -112,13 +116,13 @@ describe("EnvManagerBuilder - Type Tests", () => {
       const env = EnvManagerBuilder.empty()
         .fromProcess({
           name: "CONFIG",
-          schema: z.string().transform((str) => JSON.parse(str)).pipe(
+          schema: z.string().transform(str => JSON.parse(str)).pipe(
             z.object({
               host: z.string(),
               port: z.number(),
-            })
+            }),
           ),
-          defaultValue: '{"host":"localhost","port":3000}',
+          defaultValue: "{\"host\":\"localhost\",\"port\":3000}",
         })
         .raw();
 
@@ -225,7 +229,7 @@ describe("EnvManagerBuilder - Type Tests", () => {
         .fromProcess({
           name: "DATABASE_CONFIG",
           schema: z.string()
-            .transform((str) => JSON.parse(str))
+            .transform(str => JSON.parse(str))
             .pipe(
               z.object({
                 host: z.string(),
@@ -234,9 +238,9 @@ describe("EnvManagerBuilder - Type Tests", () => {
                   username: z.string(),
                   password: z.string(),
                 }),
-              })
+              }),
             ),
-          defaultValue: '{"host":"localhost","port":5432,"credentials":{"username":"user","password":"pass"}}',
+          defaultValue: "{\"host\":\"localhost\",\"port\":5432,\"credentials\":{\"username\":\"user\",\"password\":\"pass\"}}",
         })
         .raw();
 
@@ -255,9 +259,9 @@ describe("EnvManagerBuilder - Type Tests", () => {
         .fromProcess({
           name: "FEATURE_FLAGS",
           schema: z.string()
-            .transform((str) => JSON.parse(str))
+            .transform(str => JSON.parse(str))
             .pipe(z.record(z.boolean())),
-          defaultValue: '{}',
+          defaultValue: "{}",
         })
         .raw();
 
