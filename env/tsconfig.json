@@ -27,7 +27,7 @@
     "skipLibCheck": true
   },
   "include": [
-    "src/Env.ts",
+    "src/types/EnvConfig.ts",
     "src/EnvManager.ts",
     "src/EnvManagerBuilder.ts",
     "vitest.config.ts"

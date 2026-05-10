@@ -1,5 +1,5 @@
 import type { ZodString, ZodType } from "zod";
-import type { EnvConfig } from "./Env";
+import type { EnvConfig } from "./types";
 import process from "node:process";
 import z from "zod";
 import { EnvManager } from "./EnvManager";

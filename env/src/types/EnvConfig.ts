@@ -1,6 +1,6 @@
 import type { ZodType } from "zod";
 import type z from "zod";
-import type { Optionable } from "./EnvManagerBuilder";
+import type { Optionable } from "../EnvManagerBuilder";
 
 export interface EnvConfig<
   TSchema extends ZodType,
