@@ -3,7 +3,6 @@ import type { ZodSchema } from "zod/v3";
 import { panic, Try } from "@blazyts/better-standard-library";
 
 type OrNull<T> = T | null;
-type isFunctionThatAlwaysThrows<T extends Function> = T extends () => never ? T : never;
 
 function isNotNone<T>(v: T | null | undefined): v is T {
   return v !== null && v !== undefined;
@@ -17,7 +16,6 @@ export class EnvOptions<
   TName extends string,
   Shape,
   TDefaultValue extends OrNull<Shape>,
-  TDefaultResolver extends (() => Shape) | (() => never),
 > {
   constructor(
     private name: TName,

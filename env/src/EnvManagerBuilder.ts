@@ -1,32 +1,22 @@
-import type { ZodType } from "zod/v3";
-import { z } from "zod/v3";
-import { EnvManager } from "./EnvManager";
-import type { ZodString } from "zod/v3";
+import type { ZodString, ZodType } from "zod";
 import type { EnvConfig } from "./Env";
-
-
+import process from "node:process";
+import z from "zod";
+import { EnvManager } from "./EnvManager";
 
 export type Optionable<T, TOptional extends boolean = false> = TOptional extends true ? T | undefined : T;
 
 export type EnvConfigDefault = EnvConfig<ZodString, false>;
 
-export type EnvSchema = Record<string, EnvConfigDefault>
+export type EnvSchema = Record<string, EnvConfig<ZodType, boolean>>;
 
-export class EnvManagerBuilder<TEnv extends EnvSchema > {
+export class EnvManagerBuilder<TEnv extends EnvSchema> {
+  public readonly envEntries: TEnv = {} as TEnv;
 
-  public readonly envEntries: TEnv = {}
-  /**
-   * Prebuilt strategy for getting environment variables from process.env
-   */
+  private constructor() {}
 
-
-  //  we make the  constructor private since it breaks the intellisense because we cant manually type the return type of the constructor  
-  private constructor(){ 
-
-  }
-
-  static empty() {
-    return new EnvManagerBuilder<{}>()
+  static empty(): EnvManagerBuilder<Record<never, never>> {
+    return new EnvManagerBuilder<Record<never, never>>();
   }
 
   private static processStrategy = (name: string): string | undefined => {
@@ -34,8 +24,8 @@ export class EnvManagerBuilder<TEnv extends EnvSchema > {
   };
 
   /**
-   * Add an environment variable with full configuration
-   * 
+   * Add an environment variable with full configuration.
+   *
    * @example
    * ```typescript
    * builder.add({
@@ -50,25 +40,26 @@ export class EnvManagerBuilder<TEnv extends EnvSchema > {
     TName extends string,
     TSchema extends ZodType,
     TOptional extends boolean = false,
-    TConfig extends EnvConfig<TSchema, TOptional> = EnvConfig<TSchema, TOptional>
+    TConfig extends EnvConfig<TSchema, TOptional> = EnvConfig<TSchema, TOptional>,
   >(
-    config: TConfig
+    config: TConfig & { name: TName },
   ): EnvManagerBuilder<TEnv & Record<TName, TConfig>> {
-    this.envEntries[config.name] = ({ 
-        ...config,
-        schema: config.schema ?? z.string() as any,
-    });
+    this.envEntries[config.name as keyof TEnv] = {
+      ...config,
+      schema: (config.schema ?? z.string()) as TConfig["schema"],
+    } as unknown as TEnv[keyof TEnv];
+
     return this as any;
   }
 
   /**
-   * Add an environment variable using the process.env strategy
-   * 
+   * Add an environment variable using the process.env strategy.
+   *
    * @example
    * ```typescript
-   * builder.fromProcess({ 
-   *   name: "PORT", 
-   *   defaultValue: "3000" 
+   * builder.fromProcess({
+   *   name: "PORT",
+   *   defaultValue: "3000"
    * })
    * ```
    */
@@ -76,9 +67,9 @@ export class EnvManagerBuilder<TEnv extends EnvSchema > {
     TName extends string,
     TSchema extends ZodType,
     TOptional extends boolean = false,
-    TConfig extends EnvConfig<TSchema, TOptional> = EnvConfig<TSchema, TOptional>
+    TConfig extends EnvConfig<TSchema, TOptional> = EnvConfig<TSchema, TOptional>,
   >(
-    config: Omit<TConfig, "strategy">
+    config: Omit<TConfig, "strategy"> & { name: TName },
   ): EnvManagerBuilder<TEnv & Record<TName, TConfig>> {
     return this.add({
       ...config,
@@ -88,15 +79,15 @@ export class EnvManagerBuilder<TEnv extends EnvSchema > {
   }
 
   /**
-   * Build the environment object by executing all strategies and validating with schemas
-   * 
+   * Build the environment object by executing all strategies and validating with schemas.
+   *
    * @throws {Error} If a required environment variable is missing and has no default value
    * @throws {ZodError} If validation fails for any environment variable
    */
   raw(): TEnv {
-    return this.envEntries 
+    return this.envEntries;
   }
-  
+
   buildManager(): EnvManager<TEnv> {
     return EnvManager.new(this.envEntries as TEnv);
   }

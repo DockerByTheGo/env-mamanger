@@ -1,9 +1,13 @@
-import { describe, it, expectTypeOf } from "vitest";
-import { z } from "zod/v3";
+import { beforeEach, describe, expectTypeOf, it } from "vitest";
+import z from "zod";
 import { EnvManager } from "../src/EnvManager";
 import { EnvManagerBuilder } from "../src/EnvManagerBuilder";
 
 describe("EnvManager - Type Tests", () => {
+  beforeEach(() => {
+    delete process.env.NODE_ENV;
+  });
+
   describe("get method return types", () => {
     it("should infer string type from strategy", () => {
       const schema = {
@@ -86,7 +90,7 @@ describe("EnvManager - Type Tests", () => {
         ALLOWED_HOSTS: {
           name: "ALLOWED_HOSTS",
           strategy: () => "localhost,example.com",
-          schema: z.string().transform((str) => str.split(",")),
+          schema: z.string().transform(str => str.split(",")),
         },
       } as const;
 
@@ -100,14 +104,14 @@ describe("EnvManager - Type Tests", () => {
       const schema = {
         CONFIG: {
           name: "CONFIG",
-          strategy: () => '{"host":"localhost","port":3000}',
+          strategy: () => "{\"host\":\"localhost\",\"port\":3000}",
           schema: z.string()
-            .transform((str) => JSON.parse(str))
+            .transform(str => JSON.parse(str))
             .pipe(
               z.object({
                 host: z.string(),
                 port: z.number(),
-              })
+              }),
             ),
         },
       } as const;
@@ -228,7 +232,7 @@ describe("EnvManager - Type Tests", () => {
         .fromProcess({
           name: "DATABASE_CONFIG",
           schema: z.string()
-            .transform((str) => JSON.parse(str))
+            .transform(str => JSON.parse(str))
             .pipe(
               z.object({
                 host: z.string(),
@@ -237,9 +241,9 @@ describe("EnvManager - Type Tests", () => {
                   username: z.string(),
                   password: z.string(),
                 }),
-              })
+              }),
             ),
-          defaultValue: '{"host":"localhost","port":5432,"credentials":{"username":"user","password":"pass"}}',
+          defaultValue: "{\"host\":\"localhost\",\"port\":5432,\"credentials\":{\"username\":\"user\",\"password\":\"pass\"}}",
         });
 
       const manager = builder.buildManager();
@@ -260,9 +264,9 @@ describe("EnvManager - Type Tests", () => {
         .fromProcess({
           name: "FEATURE_FLAGS",
           schema: z.string()
-            .transform((str) => JSON.parse(str))
+            .transform(str => JSON.parse(str))
             .pipe(z.record(z.boolean())),
-          defaultValue: '{}',
+          defaultValue: "{}",
         });
 
       const manager = builder.buildManager();

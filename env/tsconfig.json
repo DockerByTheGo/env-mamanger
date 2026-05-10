@@ -25,5 +25,15 @@
     "noEmit": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true
-  }
+  },
+  "include": [
+    "src/Env.ts",
+    "src/EnvManager.ts",
+    "src/EnvManagerBuilder.ts",
+    "vitest.config.ts"
+  ],
+  "exclude": [
+    "tests",
+    "node_modules"
+  ]
 }
