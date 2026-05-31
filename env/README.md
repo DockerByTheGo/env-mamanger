@@ -234,7 +234,7 @@ bun examples/01-basic-env-manager.ts
 ## Scripts
 
 ```bash
-bun run test
+bun run node:test
 bun run coverage
 bun run lint
 ```
@@ -273,5 +273,5 @@ The project includes:
 Run the full test suite with:
 
 ```bash
-bun run test
+bun run node:test
 ```
